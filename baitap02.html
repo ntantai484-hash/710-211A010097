@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bài tập 02</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .form-card{max-width:520px;padding:1rem;border:1px solid #e6e6e6;border-radius:8px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.04);margin-top:1rem}
+    .form-card .field{display:flex;flex-direction:column;margin-bottom:.75rem}
+    .form-card label{font-weight:600;margin-bottom:.25rem}
+    .form-card input[type="text"],.form-card input[type="email"],.form-card input[type="password"]{padding:.6rem;border:1px solid #ccc;border-radius:6px;font-size:1rem}
+    .form-card .muted{color:#666;font-size:.9rem}
+    .form-card .checkbox label{display:flex;align-items:center;gap:.5rem;font-weight:500}
+    .actions{display:flex;gap:.6rem;margin-top:.5rem}
+    .btn{padding:.5rem .9rem;border-radius:6px;border:1px solid transparent;background:#f0f0f0;cursor:pointer}
+    .btn.primary{background:#0b79d0;color:#fff}
+    .msg{padding:.5rem 0;margin-top:.6rem;border-radius:6px}
+    .msg.success{color:#084e23;background:#e6f7ea}
+    .msg.error{color:#5b0f0f;background:#fdecea}
+    @media (max-width:520px){.form-card{padding:.8rem}}
+  </style>
+</head>
+<body>
+	<header>
+		<nav class="main-nav">
+			<a href="index.html">Home</a>
+			<a href="lythuyet.html">Trả lời Lý thuyết</a>
+			<a href="baitap01.html">Bài 1 - Sản phẩm</a>
+			<a href="baitap02.html">Bài 2 - Form</a>
+			<a href="baitap03.html">Bài 3 - Timer</a>
+			<a href="diemdanh.html">Thông tin Điểm danh</a>
+			<a href="about.html">About</a>
+			<a href="contact.html">Contact</a>
+		</nav>
+	</header>
+
+  <main class="container">
+    <h1>Form đăng ký người dùng</h1>
+    <form id="regForm" class="form-card" novalidate>
+      <div class="field">
+        <label for="name">Họ và tên</label>
+        <input id="name" name="name" type="text" required>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required>
+      </div>
+      <div class="field">
+        <label for="password">Mật khẩu</label>
+        <input id="password" name="password" type="password" required>
+        <small class="muted">Tối thiểu 8 ký tự, có chữ hoa, chữ thường và số</small>
+      </div>
+      <div class="field checkbox">
+        <label><input name="agree" type="checkbox"> Đồng ý điều khoản</label>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="submit">Đăng ký</button>
+        <button class="btn" type="button" id="clearReg">Xóa</button>
+      </div>
+    </form>
+    <p id="regMsg" class="msg" style="display:none;margin-top:8px"></p>
+
+    <section style="margin-top:1rem">
+      <h3>Giải thích cách xử lý form</h3>
+      <p>Khi người dùng nhấn <strong>Đăng ký</strong>, mã JavaScript gọi <code>event.preventDefault()</code> để ngăn trang tải lại — điều này cho phép chúng ta xử lý dữ liệu trên client trước khi quyết định gửi lên server.</p>
+      <p>Dữ liệu được đọc bằng <code>new FormData(form)</code>, sau đó lấy các trường cần thiết và thực hiện kiểm tra hợp lệ sau:</p>
+      <ul>
+        <li><strong>Họ tên:</strong> không được để trống.</li>
+        <li><strong>Email:</strong> kiểm tra bằng biểu thức chính quy đơn giản để đảm bảo cú pháp hợp lệ.</li>
+        <li><strong>Mật khẩu:</strong> tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường và số (hàm <code>validPassword</code>).</li>
+        <li><strong>Điều khoản:</strong> người dùng phải tích chọn đồng ý.</li>
+      </ul>
+      <p>Nếu hợp lệ, dữ liệu được lưu tạm vào <code>localStorage</code> dưới dạng JSON. Mật khẩu trong ví dụ này được mã hoá bằng <code>btoa()</code> (Base64) chỉ để tránh lưu thẳng plain text trong ví dụ học tập — <strong>không</strong> coi Base64 là một phương pháp bảo mật thực sự.</p>
+      <p>Trong ứng dụng thực tế, bạn nên gửi dữ liệu lên server qua HTTPS và dùng các phương pháp bảo mật đúng chuẩn như hashing (bcrypt/argon2) cho mật khẩu, cùng các biện pháp kiểm soát truy cập khác.</p>
+      <p>Về giao diện, form dùng cấu trúc flexbox và media query (trong <code>css/style.css</code>) để hiển thị tốt trên thiết bị di động và desktop.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 - Nguyễn Tấn Tài</p>
+  </footer>
+
+  <script>
+    (function(){
+      const form = document.getElementById('regForm');
+      const msg = document.getElementById('regMsg');
+      const clearReg = document.getElementById('clearReg');
+      function validPassword(p){ return p.length>=8 && /[A-Z]/.test(p) && /[a-z]/.test(p) && /\d/.test(p); }
+      form.addEventListener('submit', e=>{ e.preventDefault(); const data=new FormData(form); const name=(data.get('name')||'').trim(); const email=(data.get('email')||'').trim(); const password=data.get('password')||''; const agree=form.elements['agree'].checked; if(!name){ show('Tên không được để trống','error'); form.elements['name'].focus(); return;} if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ show('Email không hợp lệ','error'); form.elements['email'].focus(); return;} if(!validPassword(password)){ show('Mật khẩu yếu','error'); form.elements['password'].focus(); return;} if(!agree){ show('Vui lòng đồng ý điều khoản','error'); return;} const payload={name,email,password:btoa(password),ts:Date.now()}; localStorage.setItem('registration',JSON.stringify(payload)); show('Đăng ký thành công','success'); form.reset(); });
+      clearReg.addEventListener('click', ()=>{ form.reset(); msg.style.display='none'; localStorage.removeItem('registration'); });
+      function show(t,type){ msg.textContent=t; msg.className='msg '+(type==='success'?'success':'error'); msg.style.display='block'; }
+    })();
+  </script>
+</body>
+</html>

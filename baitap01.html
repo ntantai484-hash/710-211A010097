@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bài 1 - Danh sách sản phẩm</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .search-row{display:flex;gap:.5rem;align-items:center;margin:1rem 0}
+    .search-row input{flex:1;padding:.5rem;border:1px solid #ccc;border-radius:4px}
+    .search-row button{padding:.5rem 0.8rem}
+
+    .products-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:1rem;
+      margin-top:1rem
+    }
+
+    .product-card{
+      border:1px solid #e0e0e0;
+      border-radius:8px;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      gap:.5rem;
+      background:#fff
+    }
+
+    .product-card img{
+      width:100%;
+      height:140px;
+      object-fit:cover;
+      border-radius:6px
+    }
+
+    .muted{color:#666}
+    .message{margin-top:1rem;color:#a00}
+
+    @media (max-width:480px){
+      .search-row{flex-direction:column}
+      .search-row button{width:100%}
+    }
+  </style>
+</head>
+
+<body>
+	<header>
+		<nav class="main-nav">
+			<a href="index.html">Home</a>
+			<a href="lythuyet.html">Trả lời Lý thuyết</a>
+			<a href="baitap01.html">Bài 1 - Sản phẩm</a>
+			<a href="baitap02.html">Bài 2 - Form</a>
+			<a href="baitap03.html">Bài 3 - Timer</a>
+			<a href="diemdanh.html">Thông tin Điểm danh</a>
+			<a href="about.html">About</a>
+			<a href="contact.html">Contact</a>
+		</nav>
+	</header>
+
+  <main class="container">
+    <h1>Danh sách sản phẩm</h1>
+
+    <div class="search-row">
+      <input id="q" type="search" placeholder="Nhập tên sản phẩm...">
+      <button id="btnSearch">Tìm</button>
+      <button id="btnClear">Xóa</button>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div id="products" class="products-grid"></div>
+
+    <section style="margin-top:1rem">
+      <h3>Giải thích logic</h3>
+      <ul>
+        <li>Mình lưu tất cả sản phẩm trong một mảng JavaScript, mỗi mục có `name`, `price` và `desc`. Giao diện chỉ đọc dữ liệu từ mảng này.</li>
+        <li>Khi người dùng nhập từ khóa, mình chuyển cả tên sản phẩm và từ khóa về chữ thường để so sánh — cách này giúp tìm kiếm không phân biệt hoa thường một cách đơn giản và hiệu quả.</li>
+        <li>Mình dùng `filter()` kết hợp `includes()` để lọc những sản phẩm có chứa chuỗi tìm kiếm. Để tránh gọi `toLowerCase()` nhiều lần, mình chuẩn bị sẵn trường `nameLower` khi khởi tạo dữ liệu.</li>
+        <li>Để phòng chống XSS, mọi nội dung hiển thị đều được gán bằng `textContent` hoặc tạo phần tử DOM (không chèn HTML thô bằng `innerHTML`).
+        </li>
+        <li>Để giảm số lần tìm kiếm khi người dùng gõ liên tục, mình áp dụng debounce (chờ một khoảng nhỏ trước khi thực hiện tìm kiếm). Với bộ dữ liệu lớn hơn có thể thêm chỉ mục hoặc thuật toán tìm kiếm tối ưu hơn.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>&copy; 2026</footer>
+
+  <script>
+    const products = [
+      {name: 'Smartphone X100', price: 7990000, desc: 'Điện thoại 128GB', img: 'images/z7688781600386_91998315a66a84921485d27707afe391.jpg'},
+      {name: 'Laptop Pro 14', price: 25990000, desc: 'Laptop lập trình', img: 'images/z7688782799571_c87670c96704f093f803a9181e45f822.jpg'},
+      {name: 'Wireless Headphones', price: 1290000, desc: 'Tai nghe không dây', img: 'images/z7688783180015_c75da106fd8769790f1c778ba4090f87.jpg'},
+      {name: 'Gaming Mouse', price: 350000, desc: 'Chuột gaming', img: 'images/z7688784376362_17dcfbbcfade17f7733865cd57a6f564.jpg'},
+      {name: 'Bluetooth Speaker', price: 450000, desc: 'Loa bluetooth', img: 'images/z7688784865093_ed7a0c911d8cf8ae6c473eff3e57ad7c.jpg'}
+    ];
+
+    products.forEach(p => p.nameLower = p.name.toLowerCase());
+
+    function formatPrice(v){
+      return new Intl.NumberFormat('vi-VN',{
+        style:'currency',
+        currency:'VND'
+      }).format(v);
+    }
+
+    function render(list){
+      const container = document.getElementById('products');
+      const message = document.getElementById('message');
+
+      container.innerHTML = '';
+
+      if(list.length === 0){
+        message.textContent = "Không tìm thấy sản phẩm!";
+        return;
+      }
+
+      message.textContent = '';
+
+      list.forEach(p=>{
+        const card = document.createElement('div');
+        card.className = 'product-card';
+
+        const img = document.createElement('img');
+        img.src = p.img;
+
+        const name = document.createElement('h3');
+        name.textContent = p.name;
+
+        const price = document.createElement('p');
+        price.textContent = formatPrice(p.price);
+
+        const desc = document.createElement('p');
+        desc.textContent = p.desc;
+
+        card.appendChild(img);
+        card.appendChild(name);
+        card.appendChild(price);
+        card.appendChild(desc);
+
+        container.appendChild(card);
+      });
+    }
+
+    function search(){
+      const q = document.getElementById('q').value.trim().toLowerCase();
+
+      if(q === ''){
+        render(products);
+        return;
+      }
+
+      const result = products.filter(p =>
+        p.nameLower.includes(q)
+      );
+
+      render(result);
+    }
+
+    // debounce
+    function debounce(fn, delay){
+      let t;
+      return function(){
+        clearTimeout(t);
+        t = setTimeout(fn, delay);
+      }
+    }
+
+    document.getElementById('btnSearch').onclick = search;
+    document.getElementById('btnClear').onclick = ()=>{
+      document.getElementById('q').value = '';
+      render(products);
+    };
+
+    document.getElementById('q').addEventListener(
+      'input',
+      debounce(search, 200)
+    );
+
+    render(products);
+  </script>
+</body>
+</html>

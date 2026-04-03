@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Trả lời Lý thuyết</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="lythuyet.html">Trả lời Lý thuyết</a>
+      <a href="baitap01.html">Bài 1 - Sản phẩm</a>
+      <a href="baitap02.html">Bài 2 - Form</a>
+      <a href="baitap03.html">Bài 3 - Timer</a>
+      <a href="diemdanh.html">Thông tin Điểm danh</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1>Phần Lý thuyết (40 điểm)</h1>
+
+    <!-- CÂU 1 -->
+    <section>
+      <h2>1. position: absolute và position: relative (10 điểm)</h2>
+
+      <h3>So sánh</h3>
+      <ul>
+        <li><strong>position: relative</strong>
+          <ul>
+            <li>Thuộc <strong>normal flow</strong> (không bị loại khỏi layout)</li>
+            <li>Dịch chuyển dựa trên vị trí ban đầu</li>
+            <li>Vẫn giữ khoảng không gian ban đầu</li>
+          </ul>
+        </li>
+
+        <li><strong>position: absolute</strong>
+          <ul>
+            <li><strong>Out of flow</strong> (bị loại khỏi layout)</li>
+            <li>Định vị theo phần tử cha gần nhất có position ≠ static</li>
+            <li>Nếu không có → theo body</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>Ví dụ thực tế</h3>
+      <pre><code>
+.card {
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+      </code></pre>
+
+      <p>→ Dùng để đặt badge "Sale" ở góc sản phẩm</p>
+
+      <h3>Responsive & Deploy</h3>
+      <ul>
+        <li>Dùng absolute với px cố định → dễ vỡ layout trên mobile</li>
+        <li>Nên dùng %, flexbox, grid để tương thích đa thiết bị</li>
+      </ul>
+    </section>
+
+    <!-- CÂU 2 -->
+    <section>
+      <h2>2. Domain, Hosting và DNS (10 điểm)</h2>
+
+      <h3>Quy trình</h3>
+      <ol>
+        <li>Mua domain (example.com)</li>
+        <li>Thuê hosting (server lưu code)</li>
+        <li>Upload code HTML/CSS/JS</li>
+        <li>Cấu hình DNS trỏ domain → hosting</li>
+      </ol>
+
+      <h3>DNS là gì?</h3>
+      <p>DNS (Domain Name System) chuyển domain thành IP</p>
+
+      <pre><code>
+example.com → 192.168.1.1
+      </code></pre>
+
+      <h3>Công cụ deploy</h3>
+      <ul>
+        <li>GitHub Pages</li>
+        <li>Netlify</li>
+      </ul>
+
+      <h3>Rủi ro bảo mật</h3>
+      <ul>
+        <li>Không dùng HTTPS → dễ bị tấn công</li>
+        <li>Lộ API key trong JavaScript</li>
+        <li>Cấu hình DNS sai → bị redirect sang web giả</li>
+      </ul>
+    </section>
+
+    <!-- CÂU 3 -->
+    <section>
+      <h2>3. let, const, var (10 điểm)</h2>
+
+      <h3>So sánh</h3>
+      <ul>
+        <li><strong>var</strong>: function scope, hoisting → undefined</li>
+        <li><strong>let</strong>: block scope, có TDZ</li>
+        <li><strong>const</strong>: block scope, không gán lại</li>
+      </ul>
+
+      <h3>Ví dụ lỗi</h3>
+      <pre><code>
+for (var i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 100);
+}
+// output: 3 3 3
+      </code></pre>
+
+      <pre><code>
+for (let i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 100);
+}
+// output: 0 1 2
+      </code></pre>
+
+      <h3>Giải thích</h3>
+      <p>
+        var dùng chung 1 biến i → nên in ra 3 lần số 3.<br>
+        let tạo block scope → mỗi vòng lặp là 1 giá trị riêng.
+      </p>
+
+      <h3>Debug</h3>
+      <ul>
+        <li>Mở DevTools (F12)</li>
+        <li>Console.log</li>
+        <li>Breakpoint</li>
+        <li>Pause on exception</li>
+      </ul>
+    </section>
+
+    <!-- CÂU 4 -->
+    <section>
+      <h2>4. Event Delegation (10 điểm)</h2>
+
+      <h3>Khái niệm</h3>
+      <p>
+        Event Delegation là kỹ thuật gắn event vào phần tử cha,
+        sử dụng <strong>event bubbling</strong> để xử lý sự kiện từ phần tử con.
+      </p>
+
+      <h3>Ví dụ</h3>
+      <pre><code>
+document.getElementById("list").addEventListener("click", function(e) {
+  if (e.target.tagName === "LI") {
+    alert(e.target.textContent);
+  }
+});
+      </code></pre>
+
+      <h3>Ứng dụng</h3>
+      <p>Danh sách động (render bằng JavaScript)</p>
+
+      <h3>Lợi ích</h3>
+      <ul>
+        <li>Giảm số lượng event listener</li>
+        <li>Tăng hiệu suất</li>
+        <li>Hỗ trợ phần tử thêm động</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2026 - Bài thi Web</p>
+  </footer>
+
+</body>
+</html>

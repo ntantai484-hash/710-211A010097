@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bài tập 19 - Memory Card Flip Game</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="main-nav">
+    <a href="index.html">Home</a>
+    <a href="lythuyet.html">Trả lời Lý thuyết</a>
+    <a href="baitap01.html">Bài 1 - Sản phẩm</a>
+    <a href="baitap02.html">Bài 2 - Form</a>
+    <a href="baitap03.html">Bài 3 - Timer</a>
+    <a href="diemdanh.html">Thông tin Điểm Danh</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+  <main class="container">
+    <h1>Memory Card Flip Game (Bài 19)</h1>
+    <p>Ghép đôi 8 thẻ (4 cặp). Click để lật, 2 thẻ lật cùng lúc để so sánh.</p>
+
+    <div class="controls">
+      <div class="moves">Moves: <span id="moves">0</span></div>
+      <button id="reset" class="btn">Reset</button>
+    </div>
+
+    <section class="grid" id="board" aria-label="Bàn chơi"></section>
+
+    <div id="modal" class="modal" role="dialog" aria-modal="true">
+      <div class="modal-box">
+        <h2>Chúc mừng!</h2>
+        <p>Bạn đã thắng trong <span id="final-moves">0</span> lượt.</p>
+        <button id="play-again" class="btn">Chơi lại</button>
+      </div>
+    </div>
+  </main>
+  <script src="js/baitap19.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bài tập 03</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+	<header>
+		<nav class="main-nav">
+			<a href="index.html">Home</a>
+			<a href="lythuyet.html">Trả lời Lý thuyết</a>
+			<a href="baitap01.html">Bài 1 - Sản phẩm</a>
+			<a href="baitap02.html">Bài 2 - Form</a>
+			<a href="baitap03.html">Bài 3 - Timer</a>
+			<a href="diemdanh.html">Thông tin Điểm danh</a>
+			<a href="about.html">About</a>
+			<a href="contact.html">Contact</a>
+		</nav>
+	</header>
+
+  <main class="container">
+    <h1>Countdown Timer — 10 phút</h1>
+    <div style="display:flex;gap:12px;align-items:center">
+      <div id="timer" class="timer">10:00</div>
+      <button id="start">Bắt đầu</button>
+      <button id="stop">Dừng</button>
+      <button id="reset">Reset</button>
+    </div>
+
+    <div id="modal" class="modal" role="dialog" aria-modal="true">
+      <div class="modal-box">
+        <h3>Hết thời gian</h3>
+        <p>Đồng hồ đã về 00:00.</p>
+        <button id="close">Đóng</button>
+      </div>
+    </div>
+
+    <section style="margin-top:1rem">
+      <h3>Giải thích logic & đồng bộ khi deploy</h3>
+      <p><strong>Quản lý interval:</strong> Tôi dùng một biến duy nhất cho interval (`intervalId`) và luôn kiểm tra để tránh tạo nhiều interval cùng lúc. Khi dừng hoặc chuyển trang, tôi gọi <code>clearInterval()</code> và đặt lại biến về <code>null</code> — cách này tránh memory leak.</p>
+      <p><strong>Độ chính xác & drift:</strong> Thay vì giảm bộ đếm mỗi giây, timer tính thời điểm kết thúc (timestamp) khi bắt đầu và mỗi lần cập nhật lấy thời gian hiện tại để tính số giây còn lại. Cách này chống drift do setInterval không chính xác theo thời gian dài.</p>
+      <p><strong>Đồng bộ thời gian khi deploy (Vercel):</strong> trước khi chạy timer, mã cố gắng lấy header <code>Date</code> từ server (fetch cùng origin) để tính bù lệch giữa thời gian client và server. Nếu deploy trên Vercel bạn có thể cung cấp endpoint server (ví dụ <code>/api/time</code>) để trả về UTC server time; client sẽ dùng offset này để tính chính xác đồng hồ (quan trọng khi so sánh kết quả giữa nhiều client hoặc khi server quyết định thời gian kết thúc).</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 - Nguyễn Tấn Tài</p>
+  </footer>
+
+  <script>
+    (function(){
+      const timerEl = document.getElementById('timer');
+      const startBtn = document.getElementById('start');
+      const stopBtn = document.getElementById('stop');
+      const resetBtn = document.getElementById('reset');
+      const modal = document.getElementById('modal');
+      const close = document.getElementById('close');
+
+      const total = 10 * 60; // seconds
+      let remaining = total;
+      let intervalId = null;
+      let endTs = null; // timestamp (ms) when timer ends
+      let serverOffset = 0; // ms: serverTime - clientTime
+
+      function fmt(s){
+        const mm = String(Math.floor(s/60)).padStart(2,'0');
+        const ss = String(s%60).padStart(2,'0');
+        return mm + ':' + ss;
+      }
+
+      function getNow(){ return Date.now() + serverOffset; }
+
+      function updateDisplay(sec){
+        timerEl.textContent = fmt(sec);
+        if(sec < 60) timerEl.classList.add('warn'); else timerEl.classList.remove('warn');
+      }
+
+      function stopInterval(){ if(intervalId){ clearInterval(intervalId); intervalId = null; } }
+
+      function tick(){
+        const now = getNow();
+        const left = Math.max(0, Math.round((endTs - now) / 1000));
+        remaining = left;
+        updateDisplay(remaining);
+        if(remaining <= 0){ stopInterval(); modal.classList.add('show'); }
+      }
+
+      async function syncServerTime(){
+        // Try to get server time from response header Date (same-origin fetch)
+        try{
+          const resp = await fetch(window.location.href, {cache:'no-store'});
+          const dateHeader = resp.headers.get('date');
+          if(dateHeader){
+            const serverMs = new Date(dateHeader).getTime();
+            serverOffset = serverMs - Date.now();
+          }
+        }catch(e){
+          // fallback: leave serverOffset = 0
+          console.warn('Không thể lấy thời gian server, dùng thời gian client');
+        }
+      }
+
+      startBtn.addEventListener('click', async ()=>{
+        if(intervalId) return; // already running
+        await syncServerTime();
+        const now = getNow();
+        endTs = now + remaining * 1000;
+        // use shorter interval to keep display responsive and compute remaining from timestamps
+        intervalId = setInterval(tick, 250);
+        tick();
+      });
+
+      stopBtn.addEventListener('click', ()=>{
+        if(!intervalId) return;
+        stopInterval();
+        // recompute remaining from endTs so resume works accurately
+        const now = getNow();
+        remaining = Math.max(0, Math.round((endTs - now) / 1000));
+      });
+
+      resetBtn.addEventListener('click', ()=>{
+        stopInterval();
+        remaining = total;
+        endTs = null;
+        updateDisplay(remaining);
+        modal.classList.remove('show');
+      });
+
+      close.addEventListener('click', ()=>modal.classList.remove('show'));
+
+      window.addEventListener('beforeunload', ()=>{ stopInterval(); });
+
+      // initial display
+      updateDisplay(remaining);
+    })();
+  </script>
+</body>
+</html>
